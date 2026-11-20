@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* YORUG' REJIM — asosiy #B0F2FF, oq fon, och ko'k sirtlar, to'q ko'k matn */
+    --background: 0 0% 100%;
+    --foreground: 222 60% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 60% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 60% 14%;
+    --primary: 190 100% 84.5%; /* #B0F2FF */
+    --primary-foreground: 222 60% 14%;
+    --secondary: 200 60% 95%;
+    --secondary-foreground: 222 50% 20%;
+    --muted: 200 55% 96%;
+    --muted-foreground: 218 20% 40%;
+    --accent: 195 80% 94%;
+    --accent-foreground: 222 60% 14%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 62% 33%;
+    --success-foreground: 0 0% 100%;
+    --warning: 32 90% 36%;
+    --warning-foreground: 0 0% 100%;
+    --info: 213 78% 45%;
+    --info-foreground: 0 0% 100%;
+    --brand: 192 85% 28%;
+    --border: 200 32% 89%;
+    --input: 200 28% 84%;
+    --ring: 190 85% 45%;
+    --shadow: 215 40% 20%;
+    --radius: 0.85rem;
+    --sidebar: 200 70% 97%;
+    --chart-1: 192 85% 36%;
+    --chart-2: 152 55% 40%;
+    --chart-3: 32 90% 50%;
+    --chart-4: 213 78% 52%;
+    --chart-5: 280 55% 55%;
+    color-scheme: light;
+  }
+
+  .dark {
+    /* QORONG'U REJIM — asosiy #166E7A, chuqur ko'k fon, to'q teal kartalar, oq matn */
+    --background: 218 55% 8%;
+    --foreground: 0 0% 98%;
+    --card: 198 45% 12%;
+    --card-foreground: 0 0% 98%;
+    --popover: 198 45% 13%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 187 69% 28%; /* #166E7A */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 197 38% 18%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 198 38% 16%;
+    --muted-foreground: 195 18% 68%;
+    --accent: 192 45% 20%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 55% 50%;
+    --success-foreground: 0 0% 8%;
+    --warning: 38 92% 58%;
+    --warning-foreground: 0 0% 8%;
+    --info: 208 90% 66%;
+    --info-foreground: 0 0% 8%;
+    --brand: 187 70% 62%;
+    --border: 195 30% 22%;
+    --input: 195 28% 26%;
+    --ring: 187 70% 45%;
+    --shadow: 0 0% 0%;
+    --sidebar: 218 52% 10%;
+    --chart-1: 187 70% 58%;
+    --chart-2: 152 55% 52%;
+    --chart-3: 38 92% 58%;
+    --chart-4: 208 90% 66%;
+    --chart-5: 280 60% 70%;
+    color-scheme: dark;
+  }
+
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Telefonda gorizontal siljishni oldini olish */
+  body {
+    overflow-x: clip;
+  }
+  img, svg, video {
+    max-width: 100%;
+  }
+  /* iOS Safari 16px dan kichik maydonga bosilganda sahifani yaqinlashtirib yubormasligi uchun */
+  @media (max-width: 767px) {
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+      font-size: 16px;
+    }
+  }
+  /* Sensorli ekranlarda bosish maydoni kamida ~40px */
+  @media (pointer: coarse) {
+    button, [role="tab"], summary {
+      touch-action: manipulation;
+    }
+    .h-8.w-8 {
+      height: 2.25rem;
+      width: 2.25rem;
+    }
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+  /* Silliq mavzu o'tishi */
+  .card-transition,
+  [class*="bg-card"],
+  [class*="border-border"] {
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+  }
+  ::selection {
+    background: hsl(var(--primary) / 0.6);
+  }
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="time"] {
+    min-height: 2.5rem;
+  }
+  .dark input::-webkit-calendar-picker-indicator {
+    filter: invert(0.85);
+  }
+}
+
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
