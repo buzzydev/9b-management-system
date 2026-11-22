@@ -11,6 +11,10 @@ import { auditActor } from "./audit-actor";
 
 export { HttpError } from "./http-error";
 
+export type RouteContext<TParams extends Record<string, string> = Record<string, string>> = {
+  params: Promise<TParams>;
+};
+
 export function clientIp(req: Request): string | null {
   if (!env.trustProxy) return null;
   const xff = req.headers.get("x-forwarded-for");
@@ -94,11 +98,11 @@ function errorResponse(e: unknown, req: NextRequest) {
 }
 
 /**
- * Barcha API route'lar shu orqali yoziladi: autentifikatsiya → ruxsat → CSRF → rate limit → validatsiya → xatolar.
- * Ruxsat tekshiruvi SERVERDA bajariladi (UI yashirishi xavfsizlik emas).
+- Barcha API route'lar shu orqali yoziladi: autentifikatsiya → ruxsat → CSRF → rate limit → validatsiya → xatolar.
+- Ruxsat tekshiruvi SERVERDA bajariladi (UI yashirishi xavfsizlik emas).
  */
 export function route<B = undefined>(opts: Opts<B>, handler: Handler<B>) {
-  return async (req: NextRequest, segment?: { params?: Promise<Record<string, string>> }) => {
+  return async (req: NextRequest, context: RouteContext) => {
     try {
       let session = await getSession();
       const isGuest = !session;
@@ -132,7 +136,7 @@ export function route<B = undefined>(opts: Opts<B>, handler: Handler<B>) {
       }
 
       const current: SessionUser = session; // yopilishda (closure) torayish yo'qolmasligi uchun o'zgarmas nusxa
-      const params = (await segment?.params) ?? {};
+      const params = (await context?.params) ?? {};
       const ua = req.headers.get("user-agent")?.slice(0, 200) ?? null;
       const ctx: Ctx<B> = {
         req,
@@ -154,14 +158,20 @@ export function route<B = undefined>(opts: Opts<B>, handler: Handler<B>) {
 }
 
 /**
- * Autentifikatsiyasiz (ochiq) route'lar uchun: login, QR skan, health.
- * CSRF + rate limit + validatsiya shu yerda; sessiya tekshirilmaydi.
+- Autentifikatsiyasiz (ochiq) route'lar uchun: login, QR skan, health.
+- CSRF + rate limit + validatsiya shu yerda; sessiya tekshirilmaydi.
  */
 export function publicRoute<B = undefined>(
   opts: { body?: ZodType<B, any, any>; rate?: { name: string; limit: number; windowMs: number } },
-  handler: (ctx: { req: NextRequest; body: B; query: URLSearchParams; ip: string | null }) => Promise<unknown>,
+  handler: (ctx: {
+    req: NextRequest;
+    body: B;
+    query: URLSearchParams;
+    params: Record<string, string>;
+    ip: string | null;
+  }) => Promise<unknown>,
 ) {
-  return async (req: NextRequest) => {
+  return async (req: NextRequest, context: RouteContext) => {
     try {
       if (req.method !== "GET" && req.method !== "HEAD") assertSameOrigin(req);
       const ip = clientIp(req);
@@ -176,7 +186,8 @@ export function publicRoute<B = undefined>(
         }
         body = opts.body.parse(raw);
       }
-      const result = await handler({ req, body, query: req.nextUrl.searchParams, ip });
+      const params = (await context?.params) ?? {};
+      const result = await handler({ req, body, query: req.nextUrl.searchParams, params, ip });
       if (result instanceof Response) return result;
       return NextResponse.json(result ?? { ok: true }, { headers: NO_STORE });
     } catch (e) {
