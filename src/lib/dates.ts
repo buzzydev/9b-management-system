@@ -6,7 +6,8 @@ import { env } from "./env";
  */
 const DAY_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
-export function isDayString(s: unknown): s is string {
+/** Ataylab `boolean` (type guard emas): string tipidagi qiymatda `never`ga torayib ketmasligi uchun. */
+export function isDayString(s: unknown): boolean {
   if (typeof s !== "string" || !DAY_RE.test(s)) return false;
   const d = new Date(s + "T00:00:00.000Z");
   return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;

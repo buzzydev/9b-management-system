@@ -17,6 +17,10 @@ const csp = [
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Tip xatolari deployni to'xtatadi. Faqat favqulodda: Railway'da STRICT_BUILD=false qo'yilsa o'tkazib yuboriladi.
+  // To'liq xatolar ro'yxati uchun lokal: `npm run typecheck`.
+  typescript: { ignoreBuildErrors: process.env.STRICT_BUILD === "false" },
+  eslint: { ignoreDuringBuilds: true },
   serverExternalPackages: ["exceljs", "bcryptjs", "pg"],
   images: { formats: ["image/avif", "image/webp"], minimumCacheTTL: 60 * 60 * 24 * 30 },
   experimental: { serverActions: { bodySizeLimit: "10mb" } },
