@@ -97,7 +97,7 @@ function errorResponse(e: unknown, req: NextRequest) {
  * Ruxsat tekshiruvi SERVERDA bajariladi (UI yashirishi xavfsizlik emas).
  */
 export function route<B = undefined>(opts: Opts<B>, handler: Handler<B>) {
-  return async (req: NextRequest, segment?: { params?: Promise<Record<string, string>> }) => {
+  return async (req: NextRequest, segment: { params: Promise<Record<string, string>> }) => {
     try {
       let session = await getSession();
       const isGuest = !session;
@@ -130,7 +130,7 @@ export function route<B = undefined>(opts: Opts<B>, handler: Handler<B>) {
         body = opts.body.parse(raw);
       }
 
-      const params = (await segment?.params) ?? {};
+      const params = (await segment?.params) ?? ({} as Record<string, string>);
       const ua = req.headers.get("user-agent")?.slice(0, 200) ?? null;
       const ctx: Ctx<B> = {
         req,
