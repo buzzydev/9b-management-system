@@ -2,7 +2,7 @@ import type { Prisma, Role } from "@prisma/client";
 import { prisma } from "./db";
 
 export type AuditParams = {
-  user?: { id: string; fullName: string; role: Role } | null;
+  user?: { id: string; fullName: string; role: Role | "GUEST" } | null;
   userName?: string;
   action: string;
   category: string;
@@ -20,10 +20,11 @@ export type AuditParams = {
  * `client` (tranzaksiya) berilsa xato tashqariga chiqadi — o'zgarish va jurnal birga bekor bo'ladi.
  */
 export async function logActivity(p: AuditParams): Promise<void> {
+  const realUser = p.user && p.user.role !== "GUEST" ? { ...p.user, role: p.user.role as Role } : null;
   const data = {
-    userId: p.user?.id ?? null,
-    userName: p.user?.fullName ?? p.userName ?? "Tizim",
-    role: p.user?.role ?? null,
+    userId: realUser?.id ?? null,
+    userName: realUser?.fullName ?? p.userName ?? "Tizim",
+    role: realUser?.role ?? null,
     action: p.action,
     category: p.category,
     description: p.description.slice(0, 1000),
