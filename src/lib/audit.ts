@@ -1,5 +1,6 @@
 import type { Prisma, Role } from "@prisma/client";
 import { prisma } from "./db";
+import { normalizeAuditUser } from "./audit-actor";
 
 export type AuditParams = {
   user?: { id: string; fullName: string; role: Role } | null;
@@ -20,10 +21,11 @@ export type AuditParams = {
  * `client` (tranzaksiya) berilsa xato tashqariga chiqadi — o'zgarish va jurnal birga bekor bo'ladi.
  */
 export async function logActivity(p: AuditParams): Promise<void> {
+  const actor = normalizeAuditUser(p.user); // mehmon hech qachon foydalanuvchi sifatida yozilmaydi
   const data = {
-    userId: p.user?.id ?? null,
-    userName: p.user?.fullName ?? p.userName ?? "Tizim",
-    role: p.user?.role ?? null,
+    userId: actor?.id ?? null,
+    userName: actor?.fullName ?? p.userName ?? "Tizim",
+    role: actor?.role ?? null,
     action: p.action,
     category: p.category,
     description: p.description.slice(0, 1000),

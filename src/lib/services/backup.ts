@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db";
 import { HttpError } from "@/lib/http-error";
 import { backupsDir, ensureDir } from "@/lib/storage";
 import { logActivity } from "@/lib/audit";
+import { auditActor, type SessionLike } from "@/lib/audit-actor";
 import { localDay } from "./backup-policy";
 import {
   BackupError,
@@ -210,7 +211,7 @@ function revive(modelName: string, row: Record<string, unknown>) {
   return out;
 }
 
-export async function restoreBackup(id: string, actor: { id: string; fullName: string; role: any }, ip: string | null) {
+export async function restoreBackup(id: string, actor: SessionLike, ip: string | null) {
   const { bytes } = await loadBackupBytes(id);
   let dump;
   try {
@@ -263,7 +264,7 @@ export async function restoreBackup(id: string, actor: { id: string; fullName: s
         }
       }
       await logActivity({
-        user: actor,
+        ...auditActor(actor),
         action: "BACKUP_RESTORE",
         category: "backup",
         description: `Zaxiradan tiklandi (${id}); xavfsizlik nusxasi: ${safety.filename}${skippedUsers.length ? `; o'tkazib yuborilgan foydalanuvchilar: ${skippedUsers.join(", ")}` : ""}`,

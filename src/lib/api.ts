@@ -7,6 +7,7 @@ import { HttpError } from "./http-error";
 import { enforceRate } from "./rate-limit";
 import { env } from "./env";
 import { logActivity } from "./audit";
+import { auditActor } from "./audit-actor";
 
 export { HttpError } from "./http-error";
 
@@ -130,17 +131,18 @@ export function route<B = undefined>(opts: Opts<B>, handler: Handler<B>) {
         body = opts.body.parse(raw);
       }
 
+      const current: SessionUser = session; // yopilishda (closure) torayish yo'qolmasligi uchun o'zgarmas nusxa
       const params = (await segment?.params) ?? {};
       const ua = req.headers.get("user-agent")?.slice(0, 200) ?? null;
       const ctx: Ctx<B> = {
         req,
-        session,
+        session: current,
         body,
         query: req.nextUrl.searchParams,
         params,
         ip,
         log: (l, client) =>
-          logActivity({ ...l, user: session.role === "GUEST" ? null : (session as SessionUser & { role: Role }), ip, userAgent: ua, client }),
+          logActivity({ ...l, ...auditActor(current), ip, userAgent: ua, client }),
       };
       const result = await handler(ctx);
       if (result instanceof Response) return result;
